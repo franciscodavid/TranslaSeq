@@ -1,0 +1,17 @@
+Package: TranslaSeq
+Type: Package
+Title: Translational control assessment from ribosome footprint and total RNA libraries
+Version: 0.99.0
+Date: 2017-07-25
+Authors@R: person("Francisco D.", "Morón-Duran", email = "fmoron@idibell.cat", role = c("aut", "cre"))
+Description: Account for translational efficiency changes for individual transcripts and their statistical significance across different experimental conditions.
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.11.6), RcppParallel, parallel, doMC, foreach, ShortRead, R.utils
+Depends: Biobase, DESeq2
+Suggests: Rsubread, knitr, rmarkdown
+VignetteBuilder: knitr
+LinkingTo: Rcpp, RcppParallel
+SystemRequirements: GNU make
+Encoding: UTF-8
+RoxygenNote: 6.0.1
+biocViews: RiboSeq, RNASeq, Alignment, Preprocessing, Transcriptomics, GeneExpression, Transcription, Sequencing, DifferentialExpression

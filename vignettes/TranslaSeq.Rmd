@@ -1,0 +1,298 @@
+---
+title: "Assessing Translational Control with R and the TranslaSeq package"
+author: "Francisco D. Morón-Duran"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+  github_document:
+    dev: "CairoPNG"
+  pdf_document: default
+vignette: >
+  %\VignetteIndexEntry{Assessing Translational Control with R and the TranslaSeq package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(prompt = FALSE, engine.opts = c(bash = '-l'))
+knitr::knit_hooks$set(prompt = function(before, options, envir) {
+  if (before) {
+    if (options$engine == 'bash') options(prompt = '$ ', continue = '> ')
+    else options(prompt = '> ', continue = '+ ')
+    options(download.file.method = "curl")
+  }
+})
+knitr::opts_knit$set(root.dir = tempdir())
+```
+
+<style>
+  body {
+    text-align: justify
+  }
+  pre {
+    overflow-x: auto;
+  }
+  pre code {
+    word-wrap: normal;
+    white-space: pre;
+  }
+</style>
+
+## Introduction
+
+Protein synthesis does not always follow the same correlation with transcript
+abundance. The patterns governing how ribosomes translate messenger RNA have not
+yet been resolved. Why, in some cases, do protein levels seem uncoupled from the
+transcriptome status is an important biological question that science is trying
+to address. This R package tries to detect which transcripts show changes in
+translation efficiency, therefore they are translated differentially, across
+distinct experimental conditions from ribosome footprint and total RNA
+libraries.
+
+### Installing TranslaSeq
+
+```{r TranslaSeq_install, message = FALSE, prompt = TRUE, eval = FALSE}
+library(devtools)
+install_github("franciscodavid/TranslaSeq")
+```
+
+### TranslaSeq Usage
+
+#### Input data
+
+For each experimental condition, two files are expected. One for the total RNA
+library and another one for the ribosome protected RNA. Currently, the accepted
+filetypes include **FASTQ** from sequencing facilities (only in Unix-like
+environments), **BAM/SAM** from sequence alignment software and **raw count**
+values from transcript abundance quantification. The only restriction that
+applies is that all files should be of the same type. From each of these files,
+all the subsequent steps required to achieve a translation efficiency fold
+change and its associated p-value and adjusted p-value for every gene are
+performed by TranslaSeq.
+
+Althought TranslaSeq is capable of preprocessing and aligning raw reads in
+Unix-like environments, you are encouraged to use external tools with fine-tuned
+parameters to achieve more accurate results. TranslaSeq only performs a default
+unsupervised alignment with a provided annotated genome using
+[Rsubread](http://subread.sourceforge.net/).
+
+#### Metadata: `metadata.tsv` file
+
+A well-formatted metadata file is required. In this file, a table
+with five mandatory columns should be present, which are:
+
+* **name**: the library name.
+* **file**: the path to the file containing library data.
+* **type**: the library type, either *rpf* or *rna*.
+* **condition**: this column defines the experimental condition group the
+library belongs to and can have an arbitrary name different from *name*,
+*type*, *file* or *comment.*
+* **comment**: a human-readable description of the library.
+
+***comment* should always be the last column**! The table should be written
+into a *tab separated values* **.tsv** file. Here you have an example of a
+metadata table.
+
+|  name  | file            |   type  |   drug  | comment                     |
+|-------:|:----------------|:-------:|:-------:|-----------------------------|
+| rna_v1 | rna_v1.fastq.gz |   rna   | vehicle | "library processed by Paul" |
+| rna_v2 | rna_v2.fastq.gz |   rna   | vehicle | "library processed by Fran" |
+| rpf_v1 | rpf_v1.fastq.gz |   rpf   | vehicle | "library processed by Paul" |
+| rpf_v2 | rpf_v2.fastq.gz |   rpf   | vehicle | "library processed by Mark" |
+| rna_d1 | rna_d1.fastq.gz |   rna   |  drug1  | "library processed by Paul" |
+| rna_d2 | rna_d2.fastq.gz |   rna   |  drug1  | "library processed by Fran" |
+| rpf_d1 | rpf_d1.fastq.gz |   rpf   |  drug1  | "library processed by Paul" |
+| rpf_d2 | rpf_d2.fastq.gz |   rpf   |  drug1  | "library processed by Mark" |
+
+
+#### Working directory structure
+
+By default, TranslaSeq output is placed into a directory called *TranslaSeq.out*
+in the same path the *metadata.tsv* is present. To know how this behavior
+can be modified, see TranslaSeq help documentation. All the intermediate files
+needed to end up with a final table of genes and their translation efficiency
+ratios are written to disk in this directory, which is structured in the
+following way:
+
+```
+                                    TranslaSeq.out/
+                                    |-- alignments/
+                                    |-- counts/
+                                    |-- fastq/
+                                    |-- reference/
+                                    `-- pipeline.log
+```
+
+1. The **fastq** directory will contain preprocessed FASTQ files with reads
+which have been trimmed and no longer contain the adaptor sequence.
+1. The **alignments** directory will contain needed BAM/SAM files generated
+from preprocessed FASTQ files.
+1. The **counts** directory will contain *.count* text files with transcript
+counts.
+1. The **reference** directory will contain the reference genome FASTA and GTF
+annotation along with the aligner built index.
+1. **pipeline.log** file will contain a detailed log from the index build, read
+alignment and alignments count steps.
+
+Not all the directories will exist in your setting, depending on the input
+files you specified. For instance, if you provide raw counts, no *pipeline.log*
+file, *alignment*, *fastq* or *counts* directories will be created.
+
+Output filenames in these directories are built from the *name* column in
+*metadata.tsv* file, with their corresponding suffix (.fastq, .bam, .count,
+...).
+
+## Pipeline run example
+
+In this example, we are going to download a real ribosome profiling dataset
+from the SRA database in which we are going to explore genes showing
+translational control. Usually, you start from a GEO dataset accession number
+you find in some publication. Mapping this accession number to real sequencing
+files can be a bit tedious and is totally out of the scope of this document,
+but it is important that you can do this. Here it is a step by step description
+of how to do it.
+
+### Install required software
+
+To download samples from the SRA database, we are going to need some software.
+[Entrez Direct](https://www.ncbi.nlm.nih.gov/books/NBK179288/) and
+[SRA toolkit](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?cmd=show&f=software&m=software&s=software).
+Linux and MacOS users used to [Linuxbrew](http://linuxbrew.sh/)/
+[Homebrew](https://brew.sh/) just have to
+
+```{bash install_requirements_1, eval = FALSE, prompt = TRUE}
+brew install edirect sratoolkit
+```
+
+### Select an example dataset
+
+Here we are going to use a dataset already explored in the literature. We will
+analyze mRNA translation efficiency with data from the `GSE99920` dataset
+studied in a paper by *Chen et al* entitled [Development of a tissue-specific ribosome profiling approach in Drosophila enables genome-wide evaluation of translational adaptations](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007117).
+
+For this example, we will analyze the differences in the TOR-overexpressed
+samples versus the wild type samples.
+
+### Download FASTQ files
+
+First, we want to explore all dataset samples from the Bash command line:
+
+```{bash explore_GSE}
+mkdir -p assets/example
+esearch -db gds -query 'GSE99920[ACCN] AND GSM[ETYP]' < /dev/null \
+  | efetch -format docsum \
+  | xtract -pattern DocumentSummary \
+           -element Accession,RelationType,TargetObject,title \
+  > assets/example/dataset
+cat assets/example/dataset
+```
+
+The third column in the above table is the accession number for the experimental
+condition described at the end. Let's pick up the accession numbers for the runs
+containing sequencing data for these experiments:
+
+```{bash retrieve_SRR}
+cut -f3 assets/example/dataset | while read i
+do
+  esearch -db sra -query "$i[ACC]" < /dev/null \
+  | efetch -format docsum \
+  | xtract  -element Run@acc \
+  | tr '\t' ' '
+done \
+  | paste - assets/example/dataset \
+    | awk -F'\t' -v OFS=',' '{ print $2 OFS $4 OFS $1 OFS $5 }' \
+    | sed -E 's/,([^,]*)$/,"\1"/' > assets/example/dataset_runs
+mv assets/example/dataset_runs assets/example/dataset
+cat assets/example/dataset
+```
+
+For this example, we will only work with ribosome and transcriptional profiling
+files to assess differences between Tor-overexpressed and wild-type samples.
+Therefore, we will ignore the rest of samples.
+
+```{bash download_FASTQ}
+mkdir -p assets/example/data
+# Removes lines with samples we don’t want to analyze
+sed '/(TRAP)/d;/GluRIIA/d' assets/example/dataset \
+  | cut -f3 -d',' \
+  | while read i        # This could be slow, you should have enough disk space
+  do 
+    if [ ! -e "assets/example/data/$i.fastq" ]; # Ensures downloading only once
+    then
+      echo "Downloading $i.fastq";
+      fastq-dump $i && mv $i.fastq assets/example/data/
+      echo
+    else
+      echo "File $i.fastq already exists."
+    fi
+  done
+```
+
+### Create a `metadata.tsv` file
+
+Once FASTQ files have been downloaded, we have all we need to start our
+analysis. However, we still need to build our `metadata.tsv` file with our
+five mandatory columns.
+
+```{bash metadata_tsv_build}
+sed '/(TRAP)/d;/GluRIIA/d' assets/example/dataset | awk -F',' -v OFS='\t' \
+  'BEGIN {
+    print "name" OFS "file" OFS "type" OFS "condition" OFS "comment"
+  }
+  $4 ~ /ribosome/ { type = "rpf" }
+  $4 ~ /transcriptional/ { type = "rna" }
+  $4 ~ /Tor-OE/ { condition = "TOR" }
+  $4 ~ /wild type/ { condition = "WT" }
+  {
+    fastq = "data/" $3 ".fastq"
+    if(system("[ -e assets/example/" fastq " ]") == 0) {
+      print $1 OFS fastq OFS type OFS condition OFS $4
+    }
+  }' \
+  > assets/example/metadata.tsv
+cat assets/example/metadata.tsv
+```
+
+Our condition column will be `condition`.
+
+### Run TranslaSeq
+
+Now, we are ready to start R, load the TranslaSeq package and start the
+analysis.
+
+```{r TranslaSeq_run, message = FALSE, prompt = TRUE}
+library(TranslaSeq)
+setwd("assets/example")
+gtf <- "ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.18_FB2017_05/gtf/dmel-all-r6.18.gtf.gz"
+fa <- "ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.18_FB2017_05/fasta/dmel-all-chromosome-r6.18.fasta.gz"
+res <- TranslaSeq(metadata = "metadata.tsv", refname = "dmel_r6.18",
+                  gtffile = gtf, fafile = fa, ctrlabel = "WT",
+                  condition = "condition", preprocess = FALSE,
+                  threads = detectCores())
+```
+
+Then, we have the output results into the `res` object, ordered by p-value.
+The `res` object is a `List` where each item corresponds to a level of the
+condition factor. In this case, we only have the 'TOR' condition versus the
+control one.
+
+```{r final_result, prompt = TRUE}
+res
+```
+
+### Pipeline log for this example
+
+A full log with the alignment and the counting steps output should have been
+written into the `pipeline.log` file.
+
+```{bash pipeline_log, prompt = TRUE}
+ls -lh assets/example/TranslaSeq.out/pipeline.log
+```
+
+## SessionInfo
+
+```{r sessionInfo, message = FALSE, prompt = TRUE}
+sessionInfo()
+```
