@@ -1,0 +1,41 @@
+---
+layout: page
+---
+
+<script>
+  function resizeEmbed() {
+    var embedObject = document.getElementById('doc');
+    var document2 = embedObject.contentDocument;
+    var h = document2.body.scrollHeight + 25;
+    embedObject.contentWindow.window.disableRedir = true;
+    embedObject.style.height = h + 'px';
+    document2.body.style.overflow = 'hidden';
+    document2.body.addEventListener('click', function(e) {
+      var target = e.target;
+      do {
+        if (target.nodeName.toUpperCase() === 'A' && target.href) {
+          var id;
+          if(target.hostname != location.hostname) {
+            target.target = "_blank";
+          } else if(id = target.href.match(/[^\?]*#([^\?]+)/)) {
+            e.preventDefault();
+            objRect = embedObject.getBoundingClientRect();
+            elemRect = document2.getElementById(id[1]).getBoundingClientRect();
+            offset   = elemRect.top + objRect.top;
+            window.scrollTo(window.pageXOffset, offset);
+          } else {
+            target.target = "_top";
+          }
+          break;
+        }
+      } while (target = target.parentElement);
+    }, true);
+  }
+</script>
+
+<div style="margin: 1% auto; width:100%">
+  <object id="doc" type="{{ page.type }}" data="{{ page.fileUrl }}" style="width: 100%; height: 0" onload="resizeEmbed()">
+  </object>
+  <br><br>
+</div>
+

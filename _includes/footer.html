@@ -1,0 +1,70 @@
+<footer class="page-footer lighten-1" style="background-color: steelblue; position: relative; clear: both">
+  <div class="container">
+    <div class="row">
+      <div class="col l7 last-post">
+        <section>
+          <h5 class="white-text">Latest Posts</h5>
+          <ul class="collection black-text">
+            {% for post in site.posts %}
+            <li class="collection-item avatar">
+              {% assign date_format = site.minima.date_format | default: "%m/%d" %}
+              <div class="date-post">{{ post.date | date: date_format }}</div>
+              <span class="title">
+                <a class="post-link" href="{{ post.url | relative_url }}">
+                  {{ post.title | escape }}
+                </a>
+              </span>
+{{ post.content | truncatewords: 12 }}
+              <a href="{{ post.url | relative_url }}" class="secondary-content">
+                <i class="material-icons">navigate_next</i>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+      </div>
+      <div class="col l4 s12 right" style="text-align: right;">
+        <h5 class="white-text">Know Us</h5>
+        <ul>
+          <li>
+            <a class="white-text" href="http://www.idibell.cat/modul/metabolism-and-cancer/en">
+              Laboratory of Cancer Metabolism
+            </a>
+          </li>
+          <li>
+            <a class="white-text" href="http://www.idibell.cat">
+              Bellvitge Biomedical Research Institute
+            </a>
+          </li>
+          <br>
+          <li>
+            <a class="white-text" href="https://www.icoprevencio.cat/ubs/en/">
+              Biomarkers and Susceptibility Unit
+            </a>
+          </li>
+          <li>
+            <a class="white-text" href="http://ico.gencat.cat/">
+              Catalan Institute of Oncology
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-copyright">
+    <div class="container">
+      <div class="center">
+        <span style="text-align: center">
+          Powered by
+          <a target="_blank" href="http://jekyllrb.com/" class="orange-text text-lighten-3">
+            Jekyll
+          </a>
+          and
+          <a target="_blank" class="orange-text text-lighten-3" href="http://materializecss.com">
+            Materialize
+          </a>.
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>

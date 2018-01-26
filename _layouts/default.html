@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}" style="height: 100%">
+{% include head.html %}
+  <script>
+    function footAtPlace() {
+      var footElem = document.getElementsByTagName('footer')[0]
+      var h = footElem.offsetHeight + 'px';
+      document.getElementById("main").style.paddingBottom = h;
+      footElem.style.marginTop = '-' + h;
+    }
+  </script>
+  <body style="height: 100%" onload="footAtPlace()">
+    <div id="wrap" style="min-height: 100%">
+      <div id="main" style="overflow: auto">
+{% include header.html %}
+{{ content }}
+      </div>
+    </div>
+{% include footer.html %}
+{% include script.html %}
+  </body>
+</html>

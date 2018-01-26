@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <script>
+    function redirect() {
+      var urlstring = window.location.href.match(/(.*)_raw\.html/)[1];
+      if(urlstring && typeof disableRedir === "undefined") {
+        document.location.href = urlstring + ".html";
+      }
+    }
+  </script>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Francisco D. Morón-Duran" />
+
+<meta name="date" content="2018-01-19" />
+
+<title>Assessing Translational Control with R and the TranslaSeq package</title>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body onpageshow="redirect()">
+
+
+
+
+<h1 class="title toc-ignore">Assessing Translational Control with R and the TranslaSeq package</h1>
+<h4 class="author"><em>Francisco D. Morón-Duran</em></h4>
+<h4 class="date"><em>2018-01-19</em></h4>
+
+
+<div id="TOC">
+<ul>
+  <li><a href="#introduction">Introduction</a><ul>
+    <li><a href="#installing-translaseq">Installing TranslaSeq</a></li>
+    <li><a href="#translaseq-usage">TranslaSeq Usage</a><ul>
+      <li><a href="#input-data">Input data</a></li>
+      <li><a href="#metadata-metadata.tsv-file">Metadata: <code>metadata.tsv</code> file</a></li>
+      <li><a href="#working-directory-structure">Working directory structure</a></li>
+    </ul></li>
+  </ul></li>
+  <li><a href="#pipeline-run-example">Pipeline run example</a><ul>
+    <li><a href="#install-required-software">Install required software</a></li>
+    <li><a href="#select-an-example-dataset">Select an example dataset</a></li>
+    <li><a href="#download-fastq-files">Download FASTQ files</a></li>
+    <li><a href="#create-a-metadata.tsv-file">Create a <code>metadata.tsv</code> file</a></li>
+    <li><a href="#run-translaseq">Run TranslaSeq</a></li>
+    <li><a href="#pipeline-log-for-this-example">Pipeline log for this example</a></li>
+  </ul></li>
+  <li><a href="#sessioninfo">SessionInfo</a></li>
+</ul>
+</div>
+
+<style>
+  body {
+    text-align: justify
+  }
+  pre {
+    overflow-x: auto;
+  }
+  pre code {
+    word-wrap: normal;
+    white-space: pre;
+  }
+</style>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Protein synthesis does not always follow the same correlation with transcript abundance. The patterns governing how ribosomes translate messenger RNA have not yet been resolved. Why, in some cases, do protein levels seem uncoupled from the transcriptome status is an important biological question that science is trying to address. This R package tries to detect which transcripts show changes in translation efficiency, therefore they are translated differentially, across distinct experimental conditions from ribosome footprint and total RNA libraries.</p>
+<div id="installing-translaseq" class="section level3">
+<h3>Installing TranslaSeq</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw">library</span>(devtools)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw">install_github</span>(<span class="st">&quot;franciscodavid/TranslaSeq&quot;</span>)</code></pre></div>
+</div>
+<div id="translaseq-usage" class="section level3">
+<h3>TranslaSeq Usage</h3>
+<div id="input-data" class="section level3">
+<h3>Input data</h3>
+<p>For each experimental condition, two files are expected. One for the total RNA library and another one for the ribosome protected RNA. Currently, the accepted filetypes include <strong>FASTQ</strong> from sequencing facilities (only in Unix-like environments), <strong>BAM/SAM</strong> from sequence alignment software and <strong>raw count</strong> values from transcript abundance quantification. The only restriction that applies is that all files should be of the same type. From each of these files, all the subsequent steps required to achieve a translation efficiency fold change and its associated p-value and adjusted p-value for every gene are performed by TranslaSeq.</p>
+<p>Althought TranslaSeq is capable of preprocessing and aligning raw reads in Unix-like environments, you are encouraged to use external tools with fine-tuned parameters to achieve more accurate results. TranslaSeq only performs a default unsupervised alignment with a provided annotated genome using <a href="http://subread.sourceforge.net/">Rsubread</a>.</p>
+</div>
+<div id="metadata-metadata.tsv-file" class="section level3">
+<h3>Metadata: <code>metadata.tsv</code> file</h3>
+<p>A well-formatted metadata file is required. In this file, a table with five mandatory columns should be present, which are:</p>
+<ul>
+<li><strong>name</strong>: the library name.</li>
+<li><strong>file</strong>: the path to the file containing library data.</li>
+<li><strong>type</strong>: the library type, either <em>rpf</em> or <em>rna</em>.</li>
+<li><strong>condition</strong>: this column defines the experimental condition group the library belongs to and can have an arbitrary name different from <em>name</em>, <em>type</em>, <em>file</em> or <em>comment.</em></li>
+<li><strong>comment</strong>: a human-readable description of the library.</li>
+</ul>
+<p><strong><em>comment</em> should always be the last column</strong>! The table should be written into a <em>tab separated values</em> <strong>.tsv</strong> file. Here you have an example of a metadata table.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">name</th>
+<th align="left">file</th>
+<th align="center">type</th>
+<th align="center">drug</th>
+<th>comment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">rna_v1</td>
+<td align="left">rna_v1.fastq.gz</td>
+<td align="center">rna</td>
+<td align="center">vehicle</td>
+<td>“library processed by Paul”</td>
+</tr>
+<tr class="even">
+<td align="right">rna_v2</td>
+<td align="left">rna_v2.fastq.gz</td>
+<td align="center">rna</td>
+<td align="center">vehicle</td>
+<td>“library processed by Fran”</td>
+</tr>
+<tr class="odd">
+<td align="right">rpf_v1</td>
+<td align="left">rpf_v1.fastq.gz</td>
+<td align="center">rpf</td>
+<td align="center">vehicle</td>
+<td>“library processed by Paul”</td>
+</tr>
+<tr class="even">
+<td align="right">rpf_v2</td>
+<td align="left">rpf_v2.fastq.gz</td>
+<td align="center">rpf</td>
+<td align="center">vehicle</td>
+<td>“library processed by Mark”</td>
+</tr>
+<tr class="odd">
+<td align="right">rna_d1</td>
+<td align="left">rna_d1.fastq.gz</td>
+<td align="center">rna</td>
+<td align="center">drug1</td>
+<td>“library processed by Paul”</td>
+</tr>
+<tr class="even">
+<td align="right">rna_d2</td>
+<td align="left">rna_d2.fastq.gz</td>
+<td align="center">rna</td>
+<td align="center">drug1</td>
+<td>“library processed by Fran”</td>
+</tr>
+<tr class="odd">
+<td align="right">rpf_d1</td>
+<td align="left">rpf_d1.fastq.gz</td>
+<td align="center">rpf</td>
+<td align="center">drug1</td>
+<td>“library processed by Paul”</td>
+</tr>
+<tr class="even">
+<td align="right">rpf_d2</td>
+<td align="left">rpf_d2.fastq.gz</td>
+<td align="center">rpf</td>
+<td align="center">drug1</td>
+<td>“library processed by Mark”</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="working-directory-structure" class="section level3">
+<h3>Working directory structure</h3>
+<p>By default, TranslaSeq output is placed into a directory called <em>TranslaSeq.out</em> in the same path the <em>metadata.tsv</em> is present. To know how this behavior can be modified, see TranslaSeq help documentation. All the intermediate files needed to end up with a final table of genes and their translation efficiency ratios are written to disk in this directory, which is structured in the following way:</p>
+<pre><code>                                    TranslaSeq.out/
+                                    |-- alignments/
+                                    |-- counts/
+                                    |-- fastq/
+                                    |-- reference/
+                                    `-- pipeline.log</code></pre>
+<ol style="list-style-type: decimal">
+<li>The <strong>fastq</strong> directory will contain preprocessed FASTQ files with reads which have been trimmed and no longer contain the adaptor sequence.</li>
+<li>The <strong>alignments</strong> directory will contain needed BAM/SAM files generated from preprocessed FASTQ files.</li>
+<li>The <strong>counts</strong> directory will contain <em>.count</em> text files with transcript counts.</li>
+<li>The <strong>reference</strong> directory will contain the reference genome FASTA and GTF annotation along with the aligner built index.</li>
+<li><strong>pipeline.log</strong> file will contain a detailed log from the index build, read alignment and alignments count steps.</li>
+</ol>
+<p>Not all the directories will exist in your setting, depending on the input files you specified. For instance, if you provide raw counts, no <em>pipeline.log</em> file, <em>alignment</em>, <em>fastq</em> or <em>counts</em> directories will be created.</p>
+<p>Output filenames in these directories are built from the <em>name</em> column in <em>metadata.tsv</em> file, with their corresponding suffix (.fastq, .bam, .count, …).</p>
+</div>
+</div>
+</div>
+<div id="pipeline-run-example" class="section level2">
+<h2>Pipeline run example</h2>
+<p>In this example, we are going to download a real ribosome profiling dataset from the SRA database in which we are going to explore genes showing translational control. Usually, you start from a GEO dataset accession number you find in some publication. Mapping this accession number to real sequencing files can be a bit tedious and is totally out of the scope of this document, but it is important that you can do this. Here it is a step by step description of how to do it.</p>
+<div id="install-required-software" class="section level3">
+<h3>Install required software</h3>
+<p>To download samples from the SRA database, we are going to need some software. <a href="https://www.ncbi.nlm.nih.gov/books/NBK179288/">Entrez Direct</a> and <a href="https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?cmd=show&amp;f=software&amp;m=software&amp;s=software">SRA toolkit</a>. Linux and MacOS users used to <a href="http://linuxbrew.sh/">Linuxbrew</a>/ <a href="https://brew.sh/">Homebrew</a> just have to</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">brew</span> install edirect sratoolkit</code></pre></div>
+</div>
+<div id="select-an-example-dataset" class="section level3">
+<h3>Select an example dataset</h3>
+<p>Here we are going to use a dataset already explored in the literature. We will analyze mRNA translation efficiency with data from the <code>GSE99920</code> dataset studied in a paper by <em>Chen et al</em> entitled <a href="http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1007117">Development of a tissue-specific ribosome profiling approach in Drosophila enables genome-wide evaluation of translational adaptations</a>.</p>
+<p>For this example, we will analyze the differences in the TOR-overexpressed samples versus the wild type samples.</p>
+</div>
+<div id="download-fastq-files" class="section level3">
+<h3>Download FASTQ files</h3>
+<p>First, we want to explore all dataset samples from the Bash command line:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> -p assets/example
+<span class="ex">esearch</span> -db gds -query <span class="st">'GSE99920[ACCN] AND GSM[ETYP]'</span> <span class="op">&lt;</span> /dev/null \
+  <span class="kw">|</span> <span class="ex">efetch</span> -format docsum \
+  <span class="kw">|</span> <span class="ex">xtract</span> -pattern DocumentSummary \
+           -element Accession,RelationType,TargetObject,title \
+  <span class="op">&gt;</span> assets/example/dataset
+<span class="fu">cat</span> assets/example/dataset</code></pre></div>
+<pre><code>## GSM2664273   SRA SRX2902872  Tor-OE ribosome profiling replicate 3
+## GSM2664272   SRA SRX2902871  Tor-OE ribosome profiling replicate 2
+## GSM2664271   SRA SRX2902870  Tor-OE ribosome profiling replicate 1
+## GSM2664270   SRA SRX2902869  Tor-OE transcriptional profiling replicate 3
+## GSM2664269   SRA SRX2902868  Tor-OE transcriptional profiling replicate 2
+## GSM2664268   SRA SRX2902867  Tor-OE transcriptional profiling replicate 1
+## GSM2664267   SRA SRX2902866  GluRIIA ribosome profiling replicate 3
+## GSM2664266   SRA SRX2902865  GluRIIA ribosome profiling replicate 2
+## GSM2664265   SRA SRX2902864  GluRIIA ribosome profiling replicate 1
+## GSM2664264   SRA SRX2902863  GluRIIA transcriptional profiling replicate 3
+## GSM2664263   SRA SRX2902862  GluRIIA transcriptional profiling replicate 2
+## GSM2664262   SRA SRX2902861  GluRIIA transcriptional profiling replicate 1
+## GSM2664261   SRA SRX2902860  wild type translational profiling (TRAP) replicate 3
+## GSM2664260   SRA SRX2902859  wild type translational profiling (TRAP) replicate 2
+## GSM2664259   SRA SRX2902858  wild type translational profiling (TRAP) replicate 1
+## GSM2664258   SRA SRX2902857  wild type ribosome profiling replicate 3
+## GSM2664257   SRA SRX2902856  wild type ribosome profiling replicate 2
+## GSM2664256   SRA SRX2902855  wild type ribosome profiling replicate 1
+## GSM2664255   SRA SRX2902854  wild type transcriptional profiling replicate 3
+## GSM2664254   SRA SRX2902853  wild type transcriptional profiling replicate 2
+## GSM2664253   SRA SRX2902852  wild type transcriptional profiling replicate 1</code></pre>
+<p>The third column in the above table is the accession number for the experimental condition described at the end. Let’s pick up the accession numbers for the runs containing sequencing data for these experiments:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cut</span> -f3 assets/example/dataset <span class="kw">|</span> <span class="kw">while</span> <span class="bu">read</span> <span class="va">i</span>
+<span class="kw">do</span>
+  <span class="ex">esearch</span> -db sra -query <span class="st">&quot;</span><span class="va">$i[ACC]</span><span class="st">&quot;</span> <span class="op">&lt;</span> /dev/null \
+  <span class="kw">|</span> <span class="ex">efetch</span> -format docsum \
+  <span class="kw">|</span> <span class="ex">xtract</span>  -element Run@acc \
+  <span class="kw">|</span> <span class="fu">tr</span> <span class="st">'\t'</span> <span class="st">' '</span>
+<span class="kw">done</span> <span class="kw">\</span>
+  <span class="kw">|</span> <span class="ex">paste</span> - assets/example/dataset \
+    <span class="kw">|</span> <span class="fu">awk</span> -F<span class="st">'\t'</span> -v OFS=<span class="st">','</span> <span class="st">'{ print $2 OFS $4 OFS $1 OFS $5 }'</span> \
+    <span class="kw">|</span> <span class="fu">sed</span> -E <span class="st">'s/,([^,]*)$/,&quot;\1&quot;/'</span> <span class="op">&gt;</span> assets/example/dataset_runs
+<span class="fu">mv</span> assets/example/dataset_runs assets/example/dataset
+<span class="fu">cat</span> assets/example/dataset</code></pre></div>
+<pre><code>## GSM2664273,SRX2902872,SRR5667284,&quot;Tor-OE ribosome profiling replicate 3&quot;
+## GSM2664272,SRX2902871,SRR5667283,&quot;Tor-OE ribosome profiling replicate 2&quot;
+## GSM2664271,SRX2902870,SRR5667282,&quot;Tor-OE ribosome profiling replicate 1&quot;
+## GSM2664270,SRX2902869,SRR5667281,&quot;Tor-OE transcriptional profiling replicate 3&quot;
+## GSM2664269,SRX2902868,SRR5667280,&quot;Tor-OE transcriptional profiling replicate 2&quot;
+## GSM2664268,SRX2902867,SRR5667279,&quot;Tor-OE transcriptional profiling replicate 1&quot;
+## GSM2664267,SRX2902866,SRR5667278,&quot;GluRIIA ribosome profiling replicate 3&quot;
+## GSM2664266,SRX2902865,SRR5667277,&quot;GluRIIA ribosome profiling replicate 2&quot;
+## GSM2664265,SRX2902864,SRR5667276,&quot;GluRIIA ribosome profiling replicate 1&quot;
+## GSM2664264,SRX2902863,SRR5667275,&quot;GluRIIA transcriptional profiling replicate 3&quot;
+## GSM2664263,SRX2902862,SRR5667274,&quot;GluRIIA transcriptional profiling replicate 2&quot;
+## GSM2664262,SRX2902861,SRR5667273,&quot;GluRIIA transcriptional profiling replicate 1&quot;
+## GSM2664261,SRX2902860,SRR5667272,&quot;wild type translational profiling (TRAP) replicate 3&quot;
+## GSM2664260,SRX2902859,SRR5667271,&quot;wild type translational profiling (TRAP) replicate 2&quot;
+## GSM2664259,SRX2902858,SRR5667270,&quot;wild type translational profiling (TRAP) replicate 1&quot;
+## GSM2664258,SRX2902857,SRR5667269,&quot;wild type ribosome profiling replicate 3&quot;
+## GSM2664257,SRX2902856,SRR5667268,&quot;wild type ribosome profiling replicate 2&quot;
+## GSM2664256,SRX2902855,SRR5667267,&quot;wild type ribosome profiling replicate 1&quot;
+## GSM2664255,SRX2902854,SRR5667266,&quot;wild type transcriptional profiling replicate 3&quot;
+## GSM2664254,SRX2902853,SRR5667265,&quot;wild type transcriptional profiling replicate 2&quot;
+## GSM2664253,SRX2902852,SRR5667264,&quot;wild type transcriptional profiling replicate 1&quot;</code></pre>
+<p>For this example, we will only work with ribosome and transcriptional profiling files to assess differences between Tor-overexpressed and wild-type samples. Therefore, we will ignore the rest of samples.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> -p assets/example/data
+<span class="co"># Removes lines with samples we don’t want to analyze</span>
+<span class="fu">sed</span> <span class="st">'/(TRAP)/d;/GluRIIA/d'</span> assets/example/dataset \
+  <span class="kw">|</span> <span class="fu">cut</span> -f3 -d<span class="st">','</span> \
+  <span class="kw">|</span> <span class="kw">while</span> <span class="bu">read</span> <span class="va">i</span>        <span class="co"># This could be slow, you should have enough disk space</span>
+  <span class="kw">do</span> 
+    <span class="kw">if</span><span class="bu"> [</span> <span class="ot">!</span> <span class="ot">-e</span> <span class="st">&quot;assets/example/data/</span><span class="va">$i</span><span class="st">.fastq&quot;</span><span class="bu"> ]</span>; <span class="co"># Ensures downloading only once</span>
+    <span class="kw">then</span>
+      <span class="bu">echo</span> <span class="st">&quot;Downloading </span><span class="va">$i</span><span class="st">.fastq&quot;</span><span class="kw">;</span>
+      <span class="ex">fastq-dump</span> <span class="va">$i</span> <span class="kw">&amp;&amp;</span> <span class="fu">mv</span> <span class="va">$i</span>.fastq assets/example/data/
+      <span class="bu">echo</span>
+    <span class="kw">else</span>
+      <span class="bu">echo</span> <span class="st">&quot;File </span><span class="va">$i</span><span class="st">.fastq already exists.&quot;</span>
+    <span class="kw">fi</span>
+  <span class="kw">done</span></code></pre></div>
+<pre><code>## Downloading SRR5667284.fastq
+## Read 69053087 spots for SRR5667284
+## Written 69053087 spots for SRR5667284
+## 
+## Downloading SRR5667283.fastq
+## Read 32872272 spots for SRR5667283
+## Written 32872272 spots for SRR5667283
+## 
+## Downloading SRR5667282.fastq
+## Read 56343352 spots for SRR5667282
+## Written 56343352 spots for SRR5667282
+## 
+## Downloading SRR5667281.fastq
+## Read 18830104 spots for SRR5667281
+## Written 18830104 spots for SRR5667281
+## 
+## Downloading SRR5667280.fastq
+## Read 8741158 spots for SRR5667280
+## Written 8741158 spots for SRR5667280
+## 
+## Downloading SRR5667279.fastq
+## Read 20652140 spots for SRR5667279
+## Written 20652140 spots for SRR5667279
+## 
+## Downloading SRR5667269.fastq
+## Read 45156367 spots for SRR5667269
+## Written 45156367 spots for SRR5667269
+## 
+## Downloading SRR5667268.fastq
+## Read 122734505 spots for SRR5667268
+## Written 122734505 spots for SRR5667268
+## 
+## Downloading SRR5667267.fastq
+## Read 46651854 spots for SRR5667267
+## Written 46651854 spots for SRR5667267
+## 
+## Downloading SRR5667266.fastq
+## Read 19404229 spots for SRR5667266
+## Written 19404229 spots for SRR5667266
+## 
+## Downloading SRR5667265.fastq
+## Read 8817445 spots for SRR5667265
+## Written 8817445 spots for SRR5667265
+## 
+## Downloading SRR5667264.fastq
+## Read 21824072 spots for SRR5667264
+## Written 21824072 spots for SRR5667264</code></pre>
+</div>
+<div id="create-a-metadata.tsv-file" class="section level3">
+<h3>Create a <code>metadata.tsv</code> file</h3>
+<p>Once FASTQ files have been downloaded, we have all we need to start our analysis. However, we still need to build our <code>metadata.tsv</code> file with our five mandatory columns.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">sed</span> <span class="st">'/(TRAP)/d;/GluRIIA/d'</span> assets/example/dataset <span class="kw">|</span> <span class="fu">awk</span> -F<span class="st">','</span> -v OFS=<span class="st">'\t'</span> \
+  <span class="st">'BEGIN {</span>
+<span class="st">    print &quot;name&quot; OFS &quot;file&quot; OFS &quot;type&quot; OFS &quot;condition&quot; OFS &quot;comment&quot;</span>
+<span class="st">  }</span>
+<span class="st">  $4 ~ /ribosome/ { type = &quot;rpf&quot; }</span>
+<span class="st">  $4 ~ /transcriptional/ { type = &quot;rna&quot; }</span>
+<span class="st">  $4 ~ /Tor-OE/ { condition = &quot;TOR&quot; }</span>
+<span class="st">  $4 ~ /wild type/ { condition = &quot;WT&quot; }</span>
+<span class="st">  {</span>
+<span class="st">    fastq = &quot;data/&quot; $3 &quot;.fastq&quot;</span>
+<span class="st">    if(system(&quot;[ -e assets/example/&quot; fastq &quot; ]&quot;) == 0) {</span>
+<span class="st">      print $1 OFS fastq OFS type OFS condition OFS $4</span>
+<span class="st">    }</span>
+<span class="st">  }'</span> \
+  <span class="op">&gt;</span> assets/example/metadata.tsv
+<span class="fu">cat</span> assets/example/metadata.tsv</code></pre></div>
+<pre><code>## name file    type    condition   comment
+## GSM2664273   data/SRR5667284.fastq   rpf TOR &quot;Tor-OE ribosome profiling replicate 3&quot;
+## GSM2664272   data/SRR5667283.fastq   rpf TOR &quot;Tor-OE ribosome profiling replicate 2&quot;
+## GSM2664271   data/SRR5667282.fastq   rpf TOR &quot;Tor-OE ribosome profiling replicate 1&quot;
+## GSM2664270   data/SRR5667281.fastq   rna TOR &quot;Tor-OE transcriptional profiling replicate 3&quot;
+## GSM2664269   data/SRR5667280.fastq   rna TOR &quot;Tor-OE transcriptional profiling replicate 2&quot;
+## GSM2664268   data/SRR5667279.fastq   rna TOR &quot;Tor-OE transcriptional profiling replicate 1&quot;
+## GSM2664258   data/SRR5667269.fastq   rpf WT  &quot;wild type ribosome profiling replicate 3&quot;
+## GSM2664257   data/SRR5667268.fastq   rpf WT  &quot;wild type ribosome profiling replicate 2&quot;
+## GSM2664256   data/SRR5667267.fastq   rpf WT  &quot;wild type ribosome profiling replicate 1&quot;
+## GSM2664255   data/SRR5667266.fastq   rna WT  &quot;wild type transcriptional profiling replicate 3&quot;
+## GSM2664254   data/SRR5667265.fastq   rna WT  &quot;wild type transcriptional profiling replicate 2&quot;
+## GSM2664253   data/SRR5667264.fastq   rna WT  &quot;wild type transcriptional profiling replicate 1&quot;</code></pre>
+<p>Our condition column will be <code>condition</code>.</p>
+</div>
+<div id="run-translaseq" class="section level3">
+<h3>Run TranslaSeq</h3>
+<p>Now, we are ready to start R, load the TranslaSeq package and start the analysis.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw">library</span>(TranslaSeq)
+<span class="op">&gt;</span><span class="st"> </span><span class="kw">setwd</span>(<span class="st">&quot;assets/example&quot;</span>)
+<span class="op">&gt;</span><span class="st"> </span>gtf &lt;-<span class="st"> &quot;ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.18_FB2017_05/gtf/dmel-all-r6.18.gtf.gz&quot;</span>
+<span class="op">&gt;</span><span class="st"> </span>fa &lt;-<span class="st"> &quot;ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.18_FB2017_05/fasta/dmel-all-chromosome-r6.18.fasta.gz&quot;</span>
+<span class="op">&gt;</span><span class="st"> </span>res &lt;-<span class="st"> </span><span class="kw">TranslaSeq</span>(<span class="dt">metadata =</span> <span class="st">&quot;metadata.tsv&quot;</span>, <span class="dt">refname =</span> <span class="st">&quot;dmel_r6.18&quot;</span>,
+<span class="op">+</span><span class="st">                   </span><span class="dt">gtffile =</span> gtf, <span class="dt">fafile =</span> fa, <span class="dt">ctrlabel =</span> <span class="st">&quot;WT&quot;</span>,
+<span class="op">+</span><span class="st">                   </span><span class="dt">condition =</span> <span class="st">&quot;condition&quot;</span>, <span class="dt">preprocess =</span> <span class="ot">FALSE</span>,
+<span class="op">+</span><span class="st">                   </span><span class="dt">threads =</span> <span class="kw">detectCores</span>())</code></pre></div>
+<p>Then, we have the output results into the <code>res</code> object, ordered by p-value. The <code>res</code> object is a <code>List</code> where each item corresponds to a level of the condition factor. In this case, we only have the ‘TOR’ condition versus the control one.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span>res</code></pre></div>
+<pre><code>## $TOR
+##  
+## Wald test p-value: 0,0,0,+1 
+## DataFrame with 6462 rows and 9 columns
+##                 ctrlRPF   RPFlog2FC     ctrlRNA   RNAlog2FC     ctrlTE
+##               &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt;  &lt;numeric&gt;
+## FBgn0021796  332.962722    9.137508   362.60988  5.61321694 0.91823951
+## FBgn0036824 2312.809662   -2.683831   983.36236 -0.78733838 2.35194041
+## FBgn0259896    9.175985    4.469895    67.73802  2.15076985 0.13546283
+## FBgn0036837  182.421489   -1.514646   134.26389  0.01227782 1.35867872
+## FBgn0002626  833.365506    0.631896 30988.41308 -0.57495996 0.02689281
+## ...                 ...         ...         ...         ...        ...
+## FBgn0267727    37.00717  0.96001577    215.2162  1.00757051  0.1719534
+## FBgn0051390   435.99227 -0.62575784    250.1665 -0.63549997  1.7428085
+## FBgn0035300   141.10940  0.12035097    540.7758  0.10196042  0.2609388
+## FBgn0047135   336.99224  0.04566244   2302.1474  0.04500471  0.1463817
+## FBgn0034470  3790.74598 -0.34891648  14142.3045 -0.34953321  0.2680430
+##                  TElog2FC          stat       pvalue         padj
+##                 &lt;numeric&gt;     &lt;numeric&gt;    &lt;numeric&gt;    &lt;numeric&gt;
+## FBgn0021796      3.524291     -7.259919 3.873212e-13 2.502870e-09
+## FBgn0036824     -1.896493      5.503996 3.712775e-08 1.199597e-04
+## FBgn0259896      2.319125     -4.529647 5.908219e-06 1.272630e-02
+## FBgn0036837     -1.526924      4.347016 1.380024e-05 2.229428e-02
+## FBgn0002626      1.206856     -4.158866 3.198310e-05 3.684922e-02
+## ...                   ...           ...          ...          ...
+## FBgn0267727 -0.0475547411  0.0006238856    0.9995022    0.9998546
+## FBgn0051390  0.0097421248 -0.0005750027    0.9995412    0.9998546
+## FBgn0035300  0.0183905572 -0.0003355453    0.9997323    0.9998546
+## FBgn0047135  0.0006577291  0.0003180879    0.9997462    0.9998546
+## FBgn0034470  0.0006167282 -0.0001822230    0.9998546    0.9998546</code></pre>
+</div>
+<div id="pipeline-log-for-this-example" class="section level3">
+<h3>Pipeline log for this example</h3>
+<p>A full log with the alignment and the counting steps output should have been written into the <code>pipeline.log</code> file.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="fu">ls</span> -lh assets/example/TranslaSeq.out/pipeline.log</code></pre></div>
+<pre><code>## -rw-r--r-- 1 user users 1.9M Jan 19 06:48 assets/example/TranslaSeq.out/pipeline.log</code></pre>
+</div>
+</div>
+<div id="sessioninfo" class="section level2">
+<h2>SessionInfo</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="op">&gt;</span><span class="st"> </span><span class="kw">sessionInfo</span>()</code></pre></div>
+<pre><code>## R version 3.4.3 (2017-11-30)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: CentOS release 6.2 (Final)
+## 
+## Matrix products: default
+## BLAS: /home/user/.linuxbrew/Cellar/r/3.4.3_1/lib/R/lib/libRblas.so
+## LAPACK: /home/user/.linuxbrew/Cellar/r/3.4.3_1/lib/R/lib/libRlapack.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=en_US.UTF-8    
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+## [8] methods   base     
+## 
+## other attached packages:
+##  [1] Rsubread_1.28.0            TranslaSeq_0.99.0         
+##  [3] DESeq2_1.18.1              SummarizedExperiment_1.8.1
+##  [5] DelayedArray_0.4.1         matrixStats_0.52.2        
+##  [7] GenomicRanges_1.30.1       GenomeInfoDb_1.14.0       
+##  [9] IRanges_2.12.0             S4Vectors_0.16.0          
+## [11] Biobase_2.38.0             BiocGenerics_0.24.0       
+## 
+## loaded via a namespace (and not attached):
+##  [1] foreach_1.4.4          bit64_0.9-7            splines_3.4.3         
+##  [4] R.utils_2.6.0          RcppParallel_4.3.20    Formula_1.2-2         
+##  [7] highr_0.6              latticeExtra_0.6-28    blob_1.1.0            
+## [10] GenomeInfoDbData_1.0.0 yaml_2.1.16            pillar_1.1.0          
+## [13] RSQLite_2.0            backports_1.1.2        lattice_0.20-35       
+## [16] digest_0.6.14          RColorBrewer_1.1-2     XVector_0.18.0        
+## [19] checkmate_1.8.5        colorspace_1.3-2       R.oo_1.21.0           
+## [22] htmltools_0.3.6        Matrix_1.2-12          plyr_1.8.4            
+## [25] XML_3.98-1.9           genefilter_1.60.0      zlibbioc_1.24.0       
+## [28] xtable_1.8-2           scales_0.5.0           BiocParallel_1.12.0   
+## [31] htmlTable_1.11.1       tibble_1.4.1           annotate_1.56.1       
+## [34] ggplot2_2.2.1          nnet_7.3-12            lazyeval_0.2.1        
+## [37] survival_2.41-3        magrittr_1.5           memoise_1.1.0         
+## [40] evaluate_0.10.1        R.methodsS3_1.7.1      foreign_0.8-69        
+## [43] tools_3.4.3            data.table_1.10.4-3    doMC_1.3.5            
+## [46] stringr_1.2.0          munsell_0.4.3          locfit_1.5-9.1        
+## [49] cluster_2.0.6          AnnotationDbi_1.40.0   compiler_3.4.3        
+## [52] rlang_0.1.6            grid_3.4.3             RCurl_1.95-4.10       
+## [55] iterators_1.0.9        rstudioapi_0.7         htmlwidgets_0.9       
+## [58] bitops_1.0-6           base64enc_0.1-3        rmarkdown_1.8         
+## [61] codetools_0.2-15       gtable_0.2.0           DBI_0.7               
+## [64] gridExtra_2.3          knitr_1.18             bit_1.1-12            
+## [67] Hmisc_4.1-1            rprojroot_1.3-2        stringi_1.1.6         
+## [70] Rcpp_0.12.14           geneplotter_1.56.0     rpart_4.1-12          
+## [73] acepack_1.4.1</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

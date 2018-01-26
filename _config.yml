@@ -1,0 +1,7 @@
+title: TranslaSeq
+author: Francisco D. Morón-Duran
+email: fmoron@idibell.cat
+description: Translational Control Assessment from Ribosome Profiling Datasets
+baseurl: /TranslaSeq
+sass:
+    style: compressed

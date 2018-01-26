@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Translational control assessment from ribosome footprint and...</title>
+
+  <script>
+    function redirect() {
+      var urlstring = window.location.href.match(/(.*)_raw\.html/)[1];
+      if(urlstring && typeof disableRedir === "undefined") {
+        document.location.href = urlstring + ".html";
+      }
+    }
+  </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="data:text/css;base64,Ym9keSB7CiAgbWF4LXdpZHRoOiA3MDBweDsKICBtYXJnaW46IDFlbSBhdXRvOwp9Cgpib2R5LCB0ZCB7CiAgIGZvbnQtZmFtaWx5OiBzYW5zLXNlcmlmOwogICBmb250LXNpemU6IDEwcHQ7Cn0KCjo6c2VsZWN0aW9uIHsKICAgYmFja2dyb3VuZDogcmdiKDE4MSwgMjEzLCAyNTUpOwp9Cgo6Oi1tb3otc2VsZWN0aW9uewogICBiYWNrZ3JvdW5kOiByZ2IoMTgxLCAyMTMsIDI1NSk7Cn0KCmE6dmlzaXRlZCB7CiAgIGNvbG9yOiByZ2IoNTAlLCAwJSwgNTAlKTsKfQoKaDEgewogICBmb250LXNpemU6IHgtbGFyZ2U7Cn0KCmgyIHsKICAgZm9udC1zaXplOiB4LWxhcmdlOwogICBmb250LXdlaWdodDogbm9ybWFsOwp9CgpoMyB7CiAgIGNvbG9yOiByZ2IoMzUlLCAzNSUsIDM1JSk7Cn0KCmg0IHsKICAgY29sb3I6IHJnYigzNSUsIDM1JSwgMzUlKTsKICAgZm9udC1zdHlsZTogaXRhbGljOwp9CgpoNSB7CiAgIGNvbG9yOiByZ2IoMzUlLCAzNSUsIDM1JSk7Cn0KCmg2IHsKICAgY29sb3I6IHJnYigzNSUsIDM1JSwgMzUlKTsKICAgZm9udC1zdHlsZTogaXRhbGljOwp9CgoucnN0dWRpby10aGVtZXMtZmxhdC5yc3R1ZGlvLXRoZW1lcy1kYXJrLWdyZXkgaDEsCi5yc3R1ZGlvLXRoZW1lcy1mbGF0LnJzdHVkaW8tdGhlbWVzLWRhcmstZ3JleSBoMiwKLnJzdHVkaW8tdGhlbWVzLWZsYXQucnN0dWRpby10aGVtZXMtZGFyay1ncmV5IGgzLAoucnN0dWRpby10aGVtZXMtZmxhdC5yc3R1ZGlvLXRoZW1lcy1kYXJrLWdyZXkgaDQsCi5yc3R1ZGlvLXRoZW1lcy1mbGF0LnJzdHVkaW8tdGhlbWVzLWRhcmstZ3JleSBoNSwKLnJzdHVkaW8tdGhlbWVzLWZsYXQucnN0dWRpby10aGVtZXMtZGFyay1ncmV5IGg2IHsKICAgY29sb3I6IGluaGVyaXQ7Cn0KCi5yc3R1ZGlvLXRoZW1lcy1mbGF0LnJzdHVkaW8tdGhlbWVzLWRhcmstZ3JleSAqOjpzZWxlY3Rpb24sCi5yc3R1ZGlvLXRoZW1lcy1mbGF0LnJzdHVkaW8tdGhlbWVzLWRhcmstZ3JleSAqOjpzZWxlY3Rpb24gewogICBiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMTUpOwogICBjb2xvcjogI0ZGRjsKfQoKaW1nLnRvcGxvZ28gewogICBtYXgtd2lkdGg6IDRlbTsKICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTsKfQoKaW1nLmFycm93IHsKICAgd2lkdGg6IDMwcHg7CiAgIGhlaWdodDogMzBweDsKICAgYm9yZGVyOiAwOwp9CgpzcGFuLmFjcm9ueW0gewogICBmb250LXNpemU6IHNtYWxsOwp9CgpzcGFuLmVudiB7CiAgIGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7Cn0KCnNwYW4uZmlsZSB7CiAgIGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7Cn0KCnNwYW4ub3B0aW9uIHsKICAgZm9udC1mYW1pbHk6IG1vbm9zcGFjZTsKfQoKc3Bhbi5wa2cgewogICBmb250LXdlaWdodDogYm9sZDsKfQoKc3Bhbi5zYW1wIHsKICAgZm9udC1mYW1pbHk6IG1vbm9zcGFjZTsKfQoKZGl2LnZpZ25ldHRlcyBhOmhvdmVyIHsKICAgYmFja2dyb3VuZDogcmdiKDg1JSwgODUlLCA4NSUpOwp9Cgp0YWJsZSBwIHsKICAgbWFyZ2luLXRvcDogMDsKICAgbWFyZ2luLWJvdHRvbTogNnB4Owp9Cgp0YWJsZVtzdW1tYXJ5PSJSIGFyZ2Jsb2NrIl0gdHIgdGQ6Zmlyc3QtY2hpbGQgewogICBtaW4td2lkdGg6IDI0cHg7CiAgIHBhZGRpbmctcmlnaHQ6IDEycHg7Cn0K" rel="stylesheet" type="text/css" />
+</head><body onpageshow="redirect()">
+
+<table width="100%" summary="page for TranslaSeq {TranslaSeq}"><tr><td>TranslaSeq {TranslaSeq}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Translational control assessment from ribosome footprint and total RNA
+libraries</h2>
+
+<h3>Description</h3>
+
+<p>This function compares gene counts from ribosome footprint libraries with
+gene counts from total RNA libraries for the same samples across different
+experimental conditions to assess translational efficiency changes for
+individual transcripts and their statistical significance.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+TranslaSeq(metadata, refname, fafile, gtffile, ctrlabel, condition,
+           outdir = 'TranslaSeq.out', preprocess = F, threads = 1,
+           Radapt = 'CTGTAGGCACCATCAAT', platform = 'Illumina', verbose = F)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>metadata</code></td>
+<td>
+<p>A dataframe with samples metadata (see Details section).</p>
+</td></tr>
+<tr valign="top"><td><code>refname</code></td>
+<td>
+<p>Name given to the genome annotation used in the analysis.</p>
+</td></tr>
+<tr valign="top"><td><code>fafile</code></td>
+<td>
+<p>Filepath or URL address of the genome sequence FASTA file.</p>
+</td></tr>
+<tr valign="top"><td><code>gtffile</code></td>
+<td>
+<p>Filepath or URL address of the genome annotation GTF file.</p>
+</td></tr>
+<tr valign="top"><td><code>ctrlabel</code></td>
+<td>
+<p>Text label for the control condition in metadata dataframe.</p>
+</td></tr>
+<tr valign="top"><td><code>condition</code></td>
+<td>
+<p>Column name containing the condition variable in metadata.</p>
+</td></tr>
+<tr valign="top"><td><code>outdir</code></td>
+<td>
+<p>Path in which output results will be stored.</p>
+</td></tr>
+<tr valign="top"><td><code>preprocess</code></td>
+<td>
+<p>Boolean indicating whether FASTQ input should be
+preprocessed to remove adaptors.</p>
+</td></tr>
+<tr valign="top"><td><code>threads</code></td>
+<td>
+<p>Number of threads to be used in processing the input data.</p>
+</td></tr>
+<tr valign="top"><td><code>Radapt</code></td>
+<td>
+<p>Adaptor sequence to be removed from the input FASTQ files.</p>
+</td></tr>
+<tr valign="top"><td><code>platform</code></td>
+<td>
+<p>Name of the platform which generated input data (default:
+Illumina).</p>
+</td></tr>
+<tr valign="top"><td><code>verbose</code></td>
+<td>
+<p>A boolean used for debugging the entire pipeline.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>In a metadata dataframe each row represents an input file. This data
+structure has the following mandatory columns: <br />
+</p>
+
+<ol>
+<li><p> name: the sample name.
+</p>
+</li>
+<li><p> file: the path to the input file.
+</p>
+</li>
+<li><p> type: the library type, either 'rna' or 'rpf'.
+</p>
+</li>
+<li><p> comment: string describing the input file.
+</p>
+</li></ol>
+
+<p>All other wanted data fields must be inserted between type and
+comment columns. To sum up, the first column in metadata dataframe
+must be 'name'; the second one 'file'; the third one 'type'; then
+any number of arbitrary columns with other data fields and the last
+column must be 'comment'.
+</p>
+<p>Valid file names should contain these suffixes: <br />
+</p>
+
+<ul>
+<li><p> .fastq[.gz] files providing [compressed] FASTQ data.
+</p>
+</li>
+<li><p> .bam|.sam files providing alignment data.
+</p>
+</li>
+<li><p> .tsv|.count files providing count values.
+</p>
+</li></ul>
+
+<p>All files from a metadata dataframe must be of the same type.
+</p>
+<p>From the arbitrary columns, at least one should be named as the
+'condition' argument. In its field values, at least one sample
+must has the label 'ctrlabel', which will be the control condition.
+All other labels different from 'ctrlabel' will be treated as case
+conditions to be compared against the control one.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe specifying mean ribosome footprint counts, total RNA
+counts and translation efficiency ratio for the control samples along
+with log2 fold changes for the case samples and their translation
+efficiency p-value and adjusted p-value.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Francisco D. Morón-Duran
+</p>
+
+
+<h3>See Also</h3>
+
+<p>A working example can be found at
+<a href="https://franciscodavid.github.io/TranslaSeq/vignette.html">https://franciscodavid.github.io/TranslaSeq/vignette.html</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>TranslaSeq</em> version 0.99.0 ]</div>
+</body></html>
